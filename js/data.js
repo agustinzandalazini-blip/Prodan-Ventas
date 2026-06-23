@@ -301,11 +301,11 @@ function fmt(n) {
 }
 
 function today() {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
 }
 
 function nowTime() {
-  return new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  return new Date().toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit' });
 }
 
 function fmtDate(str) {

@@ -129,7 +129,12 @@ const DB = {
   setCategorias(list) { this.set(this.KEY_CATS, list); },
 
   // ── CONFIG ──
-  getConfig() { return this.get(this.KEY_CONFIG) || {}; },
+  getConfig() {
+    const cfg = this.get(this.KEY_CONFIG) || {};
+    // URL hardcodeada por defecto si no hay configuración guardada
+    if (!cfg.scriptUrl) cfg.scriptUrl = 'https://script.google.com/macros/s/AKfycbwVy0bJTBTO_jMR0fYY8AHF0bWtChQH1ZuGfZjUqadaSMHvYfMYofBR0R6B3GruvkrGXA/exec';
+    return cfg;
+  },
   setConfig(cfg) { this.set(this.KEY_CONFIG, cfg); },
 
   // ── APERTURAS ──

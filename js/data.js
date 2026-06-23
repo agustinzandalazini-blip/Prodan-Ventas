@@ -132,7 +132,7 @@ const DB = {
   getConfig() {
     const cfg = this.get(this.KEY_CONFIG) || {};
     // URL hardcodeada por defecto si no hay configuración guardada
-    if (!cfg.scriptUrl) cfg.scriptUrl = 'https://script.google.com/macros/s/AKfycbwVy0bJTBTO_jMR0fYY8AHF0bWtChQH1ZuGfZjUqadaSMHvYfMYofBR0R6B3GruvkrGXA/exec';
+    if (!cfg.scriptUrl) cfg.scriptUrl = 'https://script.google.com/macros/s/AKfycbwePuV_vpIxB3M3xZL8rPvduQMLw0CzqdHO2DSDy2UDTURCC3Ok0uNThQfxxQVxa05fAw/exec';
     return cfg;
   },
   setConfig(cfg) { this.set(this.KEY_CONFIG, cfg); },
@@ -165,12 +165,13 @@ const Sheets = {
     try {
       const resp = await fetch(cfg.scriptUrl, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload),
       });
-      return { ok: true };
+      const json = await resp.json();
+      return { ok: true, data: json };
     } catch (e) {
+      console.warn('Sheets sync error:', e.message);
       return { ok: false, error: e.message };
     }
   },

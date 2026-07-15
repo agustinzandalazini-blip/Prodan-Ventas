@@ -132,7 +132,7 @@ const DB = {
   getConfig() {
     const cfg = this.get(this.KEY_CONFIG) || {};
     // URL hardcodeada por defecto si no hay configuración guardada
-    if (!cfg.scriptUrl) cfg.scriptUrl = 'https://script.google.com/macros/s/AKfycbwePuV_vpIxB3M3xZL8rPvduQMLw0CzqdHO2DSDy2UDTURCC3Ok0uNThQfxxQVxa05fAw/exec';
+    if (!cfg.scriptUrl) cfg.scriptUrl = 'https://script.google.com/macros/s/AKfycbw33D8d8xnnLxAE5sGy9CATEEmsTggdYp6ELTimPDykP6b0T-jYFdsLzfVP2lKo74qIMw/exec';
     return cfg;
   },
   setConfig(cfg) { this.set(this.KEY_CONFIG, cfg); },

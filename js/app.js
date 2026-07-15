@@ -218,7 +218,10 @@ async function registrarVenta() {
 
   DB.addSale(sale);
 
-  // Sync to Sheets
+  // Imprimir ticket primero (antes del sync para que CORS no lo bloquee)
+  imprimirTicket(sale);
+
+  // Sync to Sheets (fire and forget)
   const cfg = DB.getConfig();
   if (cfg.scriptUrl) {
     Sheets.appendSale(sale);
@@ -235,10 +238,6 @@ async function registrarVenta() {
 
   showToast(`Venta registrada: ${fmt(total)} · ${medioPago}`);
   document.getElementById('obs-venta').value = '';
-
-  // Imprimir ticket
-  imprimirTicket(sale);
-
   limpiarCarrito();
 }
 

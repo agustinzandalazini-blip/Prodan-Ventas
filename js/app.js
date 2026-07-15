@@ -221,7 +221,7 @@ async function registrarVenta() {
   // Sync to Sheets
   const cfg = DB.getConfig();
   if (cfg.scriptUrl) {
-    Sheets.appendSale(sale); // fire and forget
+    Sheets.appendSale(sale);
   }
 
   // Animate button
@@ -235,7 +235,108 @@ async function registrarVenta() {
 
   showToast(`Venta registrada: ${fmt(total)} · ${medioPago}`);
   document.getElementById('obs-venta').value = '';
+
+  // Imprimir ticket
+  imprimirTicket(sale);
+
   limpiarCarrito();
+}
+
+// ── TICKET DE IMPRESIÓN ──
+function imprimirTicket(sale) {
+  const linea = '================================';
+  const lineaCorta = '--------------------------------';
+
+  // Calcular ancho para alinear precios (32 chars total)
+  const COL = 32;
+  function lineaProducto(nombre, cant, importe) {
+    const label = cant > 1 ? `${cant}x ${nombre}` : nombre;
+    const precio = fmt(importe);
+    const espacios = Math.max(1, COL - label.length - precio.length);
+    return label + ' '.repeat(espacios) + precio;
+  }
+
+  const itemsHTML = sale.items.map(item =>
+    `<div class="tkt-item">${lineaProducto(item.nombre, item.cantidad, item.importe)}</div>`
+  ).join('');
+
+  const totalLine = lineaProducto('TOTAL', '', sale.total);
+  const fecha = fmtDate(sale.fecha);
+  const obsLine = sale.obs ? `<div class="tkt-obs">Obs: ${sale.obs}</div>` : '';
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Ticket Prodan</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      width: 72mm;
+      padding: 4mm;
+      color: #000;
+      background: #fff;
+    }
+    .tkt-logo {
+      display: block;
+      width: 44mm;
+      margin: 0 auto 2mm auto;
+      filter: grayscale(100%) contrast(150%);
+    }
+    .tkt-center { text-align: center; }
+    .tkt-linea { border-top: 1px dashed #000; margin: 3mm 0; }
+    .tkt-item { white-space: pre; font-size: 11px; }
+    .tkt-total {
+      white-space: pre;
+      font-weight: bold;
+      font-size: 13px;
+      border-top: 1px dashed #000;
+      padding-top: 2mm;
+      margin-top: 1mm;
+    }
+    .tkt-medio { text-align: center; font-size: 11px; margin-top: 2mm; }
+    .tkt-obs { font-size: 10px; font-style: italic; margin-top: 1mm; }
+    .tkt-gracias {
+      text-align: center;
+      font-size: 11px;
+      margin-top: 4mm;
+      font-weight: bold;
+    }
+    .tkt-sub {
+      text-align: center;
+      font-size: 10px;
+      margin-top: 1mm;
+      color: #333;
+    }
+    @media print {
+      body { padding: 0; }
+      @page { margin: 0; size: 72mm auto; }
+    }
+  </style>
+</head>
+<body>
+  <img src="assets/logo.jpg" class="tkt-logo" alt="Prodan" />
+  <div class="tkt-center" style="font-size:10px">${fecha} · ${sale.hora} hs</div>
+  <div class="tkt-linea"></div>
+  ${itemsHTML}
+  ${obsLine}
+  <div class="tkt-total">${totalLine}</div>
+  <div class="tkt-medio">Medio de pago: ${sale.medioPago}</div>
+  <div class="tkt-linea"></div>
+  <div class="tkt-gracias">¡Gracias por su compra!</div>
+  <div class="tkt-sub">Prodan · Helado Natural</div>
+  <br/><br/>
+  <script>window.onload = () => { window.print(); window.onafterprint = () => window.close(); }<\/script>
+</body>
+</html>`;
+
+  const ventana = window.open('', '_blank', 'width=320,height=500,toolbar=0,menubar=0,scrollbars=0');
+  if (ventana) {
+    ventana.document.write(html);
+    ventana.document.close();
+  }
 }
 
 // ── CAJA ──
@@ -268,6 +369,7 @@ function cargarCaja() {
       <td>${cantTotal}</td>
       <td style="font-weight:700;color:var(--green)">${fmt(s.total)}</td>
       <td>${s.medioPago}</td>
+      <td><button class="action-btn" onclick='imprimirTicket(${JSON.stringify(s)})' title="Reimprimir">🖨️</button></td>
     </tr>`;
   }).join('');
 }
@@ -463,7 +565,6 @@ function generarReporte() {
     <div class="stat-card"><div class="stat-label">Ticket promedio</div><div class="stat-value">${fmt(ticket)}</div></div>
   `;
 
-  // Expand sales to rows
   const rows = [];
   sales.forEach(s => {
     s.items.forEach(item => {
@@ -528,10 +629,7 @@ function cargarConfig() {
   const cfg = DB.getConfig();
   document.getElementById('cfg-script-url').value = cfg.scriptUrl || '';
   document.getElementById('cfg-sheet-id').value   = cfg.sheetId  || '';
-
-  // Medios de pago
   renderMediosPagoConfig();
-  // Categorías
   renderCategoriasConfig();
 }
 
@@ -652,7 +750,6 @@ function cargarStock() {
     sinAp.classList.add('hidden');
   }
 
-  // Tarjetas de stock en tiempo real
   const grid = document.getElementById('stock-grid');
   grid.innerHTML = INSUMOS.map(ins => {
     const inicial   = apertura ? (apertura[ins.key] || 0) : null;
@@ -680,7 +777,6 @@ function cargarStock() {
     `;
   }).join('');
 
-  // Tabla de consumo teórico
   const body = document.getElementById('body-consumo');
   if (!apertura) {
     body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:20px">Registrá la apertura del día para ver el consumo teórico.</td></tr>';
@@ -703,7 +799,6 @@ function cargarStock() {
   }).join('');
 }
 
-// ── MODAL APERTURA ──
 function abrirModalApertura() {
   const ap = DB.getAperturaForDate(today());
   INSUMOS.forEach(ins => {
@@ -736,7 +831,6 @@ function guardarApertura() {
   showToast('Apertura del día registrada ✓');
 }
 
-// ── MODAL CIERRE CON INVENTARIO FÍSICO ──
 function abrirModalCierreStock() {
   const apertura = DB.getAperturaForDate(today());
   const sales    = DB.getSalesForDate(today());
@@ -816,10 +910,10 @@ function confirmarCierreStock() {
     const esperado = parseFloat(input.dataset.esperado) || 0;
     const real     = parseFloat(input.value);
     cierre.insumos[key] = {
-      inicial:  apertura ? (apertura[key] || 0) : 0,
+      inicial:   apertura ? (apertura[key] || 0) : 0,
       consumido: consumo[key] || 0,
       esperado,
-      real:      isNaN(real) ? null : real,
+      real:       isNaN(real) ? null : real,
       diferencia: isNaN(real) ? null : real - esperado,
     };
   });

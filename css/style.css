@@ -945,3 +945,42 @@ body {
   .user-info { justify-content: center; }
   .main-content { padding: 20px 16px; }
 }
+/* ── GASTOS Y BALANCE ── */
+.mb-20 { margin-bottom: 20px; }
+
+.cat-gasto-badge {
+  display: inline-block;
+  background: #EEF2FF;
+  color: #3730a3;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.balance-resultado {
+  padding: 18px 24px;
+  border-radius: var(--radius);
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.balance-ganancia {
+  background: var(--green-pale);
+  color: var(--green-dark);
+  border: 2px solid var(--green-light);
+}
+
+.balance-perdida {
+  background: var(--red-light);
+  color: var(--red);
+  border: 2px solid var(--red);
+}
+
+.balance-detalle {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
